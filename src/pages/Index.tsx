@@ -3,11 +3,13 @@ import { GameCanvas } from '../components/GameCanvas';
 import { StatusBar } from '../components/StatusBar';
 import { CRTOverlay } from '../components/CRTOverlay';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { MainMenu } from '../components/MainMenu';
 import { GameState } from '../types/game';
 import { Ship } from '../types/ship';
+import { GameScreen } from '../types/gameState';
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentScreen, setCurrentScreen] = useState<GameScreen>('loading');
   const [gameState, setGameState] = useState<GameState>({
     ship: null,
     currentSystem: null,
@@ -23,7 +25,7 @@ const Index = () => {
 
   // Initialize game state
   useEffect(() => {
-    if (!isLoading && !gameState.ship) {
+    if (currentScreen === 'game' && !gameState.ship) {
       const initialShip: Ship = {
         position: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         velocity: { x: 0, y: 0 },
@@ -49,10 +51,14 @@ const Index = () => {
 
       setGameState(prev => ({ ...prev, ship: initialShip }));
     }
-  }, [isLoading, gameState.ship]);
+  }, [currentScreen, gameState.ship]);
 
   const handleLoadingComplete = () => {
-    setIsLoading(false);
+    setCurrentScreen('menu');
+  };
+
+  const handleStartGame = () => {
+    setCurrentScreen('game');
   };
 
   const handleGameStateChange = (newState: GameState) => {
@@ -63,8 +69,17 @@ const Index = () => {
     setGameState(prev => ({ ...prev, ship }));
   };
 
-  if (isLoading) {
+  if (currentScreen === 'loading') {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
+
+  if (currentScreen === 'menu') {
+    return (
+      <>
+        <MainMenu onStartGame={handleStartGame} />
+        <CRTOverlay />
+      </>
+    );
   }
 
   return (

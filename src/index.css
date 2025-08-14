@@ -268,4 +268,29 @@
   .crt-effect {
     background-image: var(--crt-scanlines), var(--crt-phosphor);
   }
+
+  /* Additional Space UI Components for Menu and Input */
+  .space-input {
+    background: hsl(var(--space-void));
+    border: 1px solid hsl(var(--hull-secondary));
+    color: hsl(var(--hull-primary));
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: inherit;
+    transition: var(--transition-glow);
+    image-rendering: pixelated;
+  }
+
+  .space-input:focus {
+    border-color: hsl(var(--fx-glow-cyan));
+    box-shadow: 0 0 8px hsla(var(--fx-glow-cyan), 0.2);
+    outline: none;
+  }
+
+  @keyframes crt-flicker {
+    0% { opacity: 1; }
+    98% { opacity: 1; }
+    99% { opacity: 0.97; }
+    100% { opacity: 0.95; }
+  }
 }

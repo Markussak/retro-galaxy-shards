@@ -59,6 +59,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onGameStateCh
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // Camera offset for following the ship
+    let cameraX = 0;
+    let cameraY = 0;
+
     // Disable image smoothing for pixel art
     ctx.imageSmoothingEnabled = false;
 
@@ -67,18 +71,31 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onGameStateCh
       const deltaTime = currentTime - lastTime;
       lastTime = currentTime;
 
+      // Update camera to follow ship
+      if (gameState.ship) {
+        const targetX = canvas.width / 2 - gameState.ship.position.x;
+        const targetY = canvas.height / 2 - gameState.ship.position.y;
+        
+        // Smooth camera following
+        cameraX += (targetX - cameraX) * 0.1;
+        cameraY += (targetY - cameraY) * 0.1;
+      }
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw starfield background
+      ctx.save();
+      ctx.translate(cameraX, cameraY);
+
+      // Draw starfield background (with parallax)
       if (images.starfield) {
-        ctx.drawImage(images.starfield, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(images.starfield, -cameraX * 0.2, -cameraY * 0.2, canvas.width, canvas.height);
       }
 
       // Draw celestial bodies (example planet)
       if (images.planet) {
-        const planetX = canvas.width * 0.3;
-        const planetY = canvas.height * 0.4;
+        const planetX = 300;
+        const planetY = 200;
         const planetSize = 100;
         ctx.drawImage(images.planet, planetX - planetSize/2, planetY - planetSize/2, planetSize, planetSize);
       }
@@ -114,6 +131,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onGameStateCh
           ctx.restore();
         }
       }
+
+      ctx.restore();
 
       // Continue animation
       animationFrameRef.current = requestAnimationFrame(gameLoop);

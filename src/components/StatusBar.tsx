@@ -33,6 +33,38 @@ export const StatusBar: React.FC<StatusBarProps> = ({ ship, onShipUpdate }) => {
     return 'hsl(var(--accent-neutral))';
   };
 
+  const updateShipEnergy = () => {
+    if (!ship) return;
+    
+    let energyDrain = 0;
+    if (ship.systems.shields) energyDrain += 0.1;
+    if (ship.systems.warp) energyDrain += 0.2;
+    if (ship.systems.engines) energyDrain += 0.05;
+    if (ship.isThrusting) energyDrain += 0.3;
+    
+    const newEnergy = Math.max(0, ship.energy - energyDrain);
+    const regeneration = ship.systems.reactor ? 0.15 : 0;
+    const finalEnergy = Math.min(100, newEnergy + regeneration);
+    
+    if (finalEnergy !== ship.energy) {
+      onShipUpdate({
+        ...ship,
+        energy: finalEnergy,
+        systems: {
+          ...ship.systems,
+          shields: finalEnergy > 10 ? ship.systems.shields : false,
+          warp: finalEnergy > 20 ? ship.systems.warp : false
+        }
+      });
+    }
+  };
+
+  // Energy management
+  React.useEffect(() => {
+    const interval = setInterval(updateShipEnergy, 100);
+    return () => clearInterval(interval);
+  }, [ship]);
+
   return (
     <div className="status-bar fixed bottom-0 left-0 w-full h-[15%] flex items-stretch z-50">
       {/* Ship Systems Panel */}
